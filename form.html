@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<title>W3.CSS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<body>
+<div class="w3-container w3-blue">
+    <h3>Product Form</h3>
+</div>
+<form class="w3-container" name="product-form">
+    <p>
+    <label> Ten san pham</label>
+        <input class="w3-input" type="text" name="name" ></p>
+    <p>
+    <label>Mo ta</label>
+    <input class="w3-input" type="text" name="description"></p>
+    <p>
+        <label>Gia</label>
+    <input class="w3-input" type="number" name="price"></p>
+    <input class="w3-input" type="submit" name="submit" value="Submit">
+    <input class="w3-input" type="reset" value="Reset">
+</form>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // lấy btn submit
+            var action = 1;
+            var url = 'http://localhost:8080/api/nv1/products/';
+            var method = 'POST';
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            if (id!==undefined && id.length>0){
+                action = 2;
+            }
+            var btnSubmit = document.forms['product-form']['submit'];
+            // lấy thông tin input
+            var inputName = document.forms['product-form']['name'];
+            var inputDescription = document.forms['product-form']['description'];
+            var inputPrice = document.forms['product-form']['price'];
+            if (action === 2){
+                url=`http://localhost:8080/api/nv1/products/`${id};
+                method = 'PUT';
+                loadProductDetail(id);
+            }
+            btnSubmit.onclick = function (e) {
+                e.preventDefault(); // không để submit
+                var objectToSend = {
+                    'name': inputName.value,
+                    'description': inputDescription.value,
+                    'price': inputPrice.value,
+                }
+                var data = JSON.stringify(objectToSend);
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 201) {
+                        alert('Thêm sản phẩm thành công');
+                        window.location.href = '/index.html'; // đưa về trang danh sách sản phẩm.
+                    }
+                }
+                xhr.open(method, url, false);
+                xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+                xhr.send(data);
+            }
+
+            });
+
+            function loadProductDetail(id){
+                var getProductDetailUrl = `http://localhost:8080/api/nv1/products/`${id};
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function (){
+                    if (xhr.readyState === 4){
+                        if (xhr.status === 200){
+                            var productDetail = JSON.parse(xhr.responseText);
+                            document.forms['product-form']['name'].value = productDetail.name;
+                            document.forms['product-form']['description'].value =productDetail.description;
+                            document.forms['product-form']['price'].value = productDetail.price;
+                        }else {
+                            alert('Khong the load san pham')
+                        }
+                    }
+                }
+                xhr.open('GET',getProductDetailUrl,false);
+                xhr.send();
+            }
+    </script>
+</body>
+</html>
